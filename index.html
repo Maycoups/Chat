@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT Integration with Notion</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #chat-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        #messages {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 300px;
+            overflow-y: scroll;
+            margin-bottom: 10px;
+        }
+        .message {
+            margin-bottom: 10px;
+        }
+        .message.user {
+            text-align: right;
+        }
+        #input-form {
+            display: flex;
+        }
+        #input-form input {
+            flex: 1;
+            padding: 10px;
+        }
+        #input-form button {
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <div id="messages"></div>
+        <form id="input-form">
+            <input type="text" id="user-input" placeholder="Type your message here" required />
+            <button type="submit">Send</button>
+        </form>
+    </div>
+
+    <script>
+        const apiKey = 'sk-proj-WpbSBX9RCQJ4UyDLyKe5T3BlbkFJIwb39It0eJp5MV8JbcOw';
+
+        const messagesDiv = document.getElementById('messages');
+        const inputForm = document.getElementById('input-form');
+        const userInput = document.getElementById('user-input');
+
+        inputForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const userMessage = userInput.value;
+            addMessage(userMessage, 'user');
+            userInput.value = '';
+
+            const responseMessage = await fetchGPTResponse(userMessage);
+            addMessage(responseMessage, 'bot');
+        });
+
+        function addMessage(message, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', sender);
+            messageDiv.textContent = message;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        async function fetchGPTResponse(message) {
+            const response = await fetch('https://api.openai.com/v1/engines/davinci-codex/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    prompt: message,
+                    max_tokens: 150,
+                })
+            });
+
+            const data = await response.json();
+            return data.choices[0].text.trim();
+        }
+    </script>
+</body>
+</html>
